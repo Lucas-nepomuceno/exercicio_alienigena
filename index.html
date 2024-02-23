@@ -50,6 +50,12 @@
         var placar;
         //variavel de controle da pontuação
         var pontuacao = 0;
+        //variavel de controle do brasao
+        var brasao;
+        //lista de vidas
+        var lista_vidas = [];
+        //variavel de controle das vidas
+        var quantidade_vidas = 3;
 
         function preload() {
             //carrega o background
@@ -66,6 +72,13 @@
 
             //carrega a moeda
             this.load.image('moeda', 'assets/moeda.png');
+
+            //adiciona o coracao
+            this.load.image('vidas', 'assets/coracao.png');
+
+            //adiciona o brasão de sp
+            this.load.image('brasao', 'assets/brasao.png');
+
         }
 
         function create() {
@@ -77,7 +90,6 @@
 
             //adiciona o turbo e define-o como invisivel
             fogo = this.add.sprite(0, 0, 'turbo_nave').setVisible(false);
-
             //adiciona o alien
             alien = this.physics.add.sprite(larguraJogo/2, 0, 'player').setBounce(0.25);
             //adiciona colisão com as bordas da tela, impedindo a passagem do alien
@@ -112,10 +124,30 @@
                 //moeda fica visivel
                 moeda.setVisible(true);
             });
+
+            //adiciona o brasao redimensionado
+            brasao = this.physics.add.sprite(3*larguraJogo/4, 2*alturaJogo/3, 'brasao').setSize(9*44.7,9*57.6).setScale(0.2).setOrigin(0.5,0.5);
+            //tira a ação da gravidade
+            brasao.body.setAllowGravity(false);
+            //torna imóvel
+            brasao.body.setImmovable(true);
+            //adiciona a colisão com o alien
+            this.physics.add.collider(brasao, alien);
+            //adiciona a colisão com a moeda;
+            this.physics.add.collider(brasao, moeda);
+
+            //desafio do uso da lista
+            for (var i = 0; i < 3; i++) {
+                lista_vidas[i] = this.add.image ((500 + i*70), 100, 'vidas');
+            }
+
         }
 
         function update() {
-            //movimentação horizontal
+
+            //atualizar a posição do fogo para sempre estar com o alien 
+            fogo.setPosition(alien.x, alien.y + alien.height/2);
+
             //se a seta da esquerda pressionada, alien vai para a esquerda
             if (teclado.left.isDown) {
                 alien.setVelocityX(-150);
@@ -140,7 +172,12 @@
                 //desligar o turbo
                 semTurbo()
             }
-            fogo.setPosition(alien.x, alien.y + alien.height/2)
+
+            //função perder vida do desafio
+             if (alien.y == 800) {
+                 perdeVida(quantidade_vidas);
+                 quantidade_vidas -= 1;
+             }
         }
 
         //função que torna o turbo visivel
@@ -150,6 +187,22 @@
         //função que torna o turbo invisivel
         function semTurbo() { 
             fogo.setVisible(false);
+        }
+
+        //função que perde vida
+        function perdeVida(quantidade_vidas) {
+            //se a quantidade de vidas for maior que 1... tire o coração e retorne o alien
+            if (quantidade_vidas > 1) {
+                i = quantidade_vidas - 1;
+                lista_vidas[i].destroy();
+                alien.setPosition(larguraJogo/2, 0);
+            }
+            //caso contrário, tire o coração e reinicie o jogo
+            else {
+                i = quantidade_vidas - 1;
+                lista_vidas[i].destroy();
+                window.location.reload();
+            }
         }
     </script>
 </body>
